@@ -132,6 +132,21 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
   .basisrow input{margin:0;}
   #reportSection{display:none;}
+  .modegrid{display:grid;grid-template-columns:1fr;gap:12px;}
+  @media (min-width:560px){ .modegrid{grid-template-columns:1fr 1fr;} }
+  .modecard{
+    background:#fff;border:2px solid var(--border);border-radius:14px;padding:20px 16px;
+    text-align:center;cursor:pointer;transition:.15s;
+  }
+  .modecard:active{transform:scale(.98);}
+  .modecard:hover{border-color:var(--navy);background:var(--blue-l);}
+  .modeicon{font-size:2rem;margin-bottom:8px;}
+  .modetitle{font-weight:700;color:var(--navy);font-size:.95rem;margin-bottom:6px;}
+  .modedesc{font-size:.75rem;color:var(--muted);line-height:1.4;}
+  .backlink{
+    background:none;border:none;color:var(--navy);font-size:.8rem;font-weight:600;
+    cursor:pointer;padding:0 0 12px;text-decoration:underline;
+  }
   .fieldgrid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px;}
   .fieldgrid label{font-size:.75rem;color:var(--muted);font-weight:600;display:flex;flex-direction:column;gap:4px;}
   .fieldgrid input[type=text]{
@@ -217,7 +232,24 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
 <div class="wrap">
 
-  <div class="card">
+  <div class="card" id="modeSelect">
+    <h2>Nasıl devam etmek istersin?</h2>
+    <div class="modegrid">
+      <button class="modecard" id="modeUploadBtn">
+        <div class="modeicon">📁</div>
+        <div class="modetitle">Excel Dosyası Yükle</div>
+        <div class="modedesc">Şirketten gelen "RAKİP YEM / YETİŞTİRİCİ" formatındaki .xlsx dosyasını yükle</div>
+      </button>
+      <button class="modecard" id="modeManualBtn">
+        <div class="modeicon">✍️</div>
+        <div class="modetitle">Manuel Analiz Gir</div>
+        <div class="modedesc">Elindeki analiz değerlerini tek tek girerek Asfeed / Kuru Madde hesapla</div>
+      </button>
+    </div>
+  </div>
+
+  <div class="card" id="uploadCard" style="display:none;">
+    <button class="backlink no-print" id="backFromUpload">‹ Başka yöntem seç</button>
     <h2>1. Excel Dosyası Yükle</h2>
     <div class="dropzone" id="dropzone">
       <div>📁 <strong>Dosya seç</strong> veya sürükle bırak</div>
@@ -225,6 +257,36 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <input type="file" id="fileInput" accept=".xlsx,.xls">
     </div>
     <div class="fileinfo" id="fileInfo"></div>
+  </div>
+
+  <div class="card" id="manualCard" style="display:none;">
+    <button class="backlink no-print" id="backFromManual">‹ Başka yöntem seç</button>
+    <h2>Manuel Analiz Gir</h2>
+    <div class="basisrow" style="margin-bottom:12px;">
+      <label><input type="radio" name="manMode" value="tek" checked> Kaba ve Kesif Yem (tek nem)</label>
+      <label><input type="radio" name="manMode" value="iki"> Silaj/Yaş Yem (yaş nem + kuru nem)</label>
+    </div>
+    <div class="fieldgrid">
+      <label>Ürün Adı<input type="text" id="manUrun" placeholder="Örn. Mısır Silajı"></label>
+      <label>Tarih<input type="text" id="manTarih" placeholder="gg.aa.yyyy"></label>
+      <label id="manNemTekWrap">Nem %<input type="text" id="manNem" placeholder="Örn. 10,73"></label>
+      <label id="manYasNemWrap" style="display:none;">Yaş Nem % (kurutma öncesi)<input type="text" id="manYasNem" placeholder="Örn. 74,76"></label>
+      <label id="manKuruNemWrap" style="display:none;">Kuru Nem %<input type="text" id="manKuruNem" placeholder="Örn. 2,46"></label>
+    </div>
+    <div class="fieldgrid">
+      <label>Ham Protein %<input type="text" id="manHp"></label>
+      <label>Ham Selüloz %<input type="text" id="manHs"></label>
+      <label>Ham Yağ %<input type="text" id="manHy"></label>
+      <label>Ham Kül %<input type="text" id="manHk"></label>
+      <label>Nişasta %<input type="text" id="manNisasta"></label>
+      <label id="manAdfWrap">ADF %<input type="text" id="manAdf"></label>
+      <label id="manNdfWrap">NDF %<input type="text" id="manNdf"></label>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-primary" id="manAddBtn">Hesapla ve Listeye Ekle</button>
+    </div>
+    <div id="manPreview"></div>
+    <div id="manList" style="margin-top:14px;"></div>
   </div>
 
   <div class="card" id="selectCard" style="display:none;">
@@ -365,13 +427,19 @@ function calcRakip(row){
 function calcYetis(row){
   const yasNem = num(row[YETIS_COLS.yasNem]);
   const kuruNem = num(row[YETIS_COLS.kuruNem]);
+  // Ölçülen tüm değerler asfeed'dir. Bileşenleri kuru maddeye çevirirken HER ZAMAN Kuru Nem baz alınır
+  // (silaj olsa da olmasa da) — Yaş Nem sadece ürünün kendi KM%'sini belirlemek için kullanılır (productDM).
   const out = {};
   NUTRIENTS_YETIS.forEach(n=>{
     const measured = num(row[YETIS_COLS[n.key]]);
     let dm=null, asFed=null;
-    if(measured!==null && kuruNem!==null && kuruNem<100){
-      dm = measured*100/(100-kuruNem);
-      asFed = (yasNem!==null && yasNem<100) ? dm*(100-yasNem)/100 : measured;
+    if(measured!==null){
+      asFed = measured;
+      if(kuruNem!==null && kuruNem<100){
+        dm = measured*100/(100-kuruNem);
+      } else if(yasNem!==null && yasNem<100){
+        dm = measured*100/(100-yasNem);
+      }
     }
     out[n.key] = {asFed, dm};
   });
@@ -392,6 +460,126 @@ function productDM(type,row){
     return null;
   }
 }
+
+/* ---------------- UI: mode select ---------------- */
+document.getElementById('modeUploadBtn').addEventListener('click', ()=>{
+  document.getElementById('modeSelect').style.display='none';
+  document.getElementById('uploadCard').style.display='block';
+});
+document.getElementById('modeManualBtn').addEventListener('click', ()=>{
+  document.getElementById('modeSelect').style.display='none';
+  document.getElementById('manualCard').style.display='block';
+});
+document.getElementById('backFromUpload').addEventListener('click', ()=>{
+  document.getElementById('uploadCard').style.display='none';
+  document.getElementById('modeSelect').style.display='block';
+});
+document.getElementById('backFromManual').addEventListener('click', ()=>{
+  document.getElementById('manualCard').style.display='none';
+  document.getElementById('modeSelect').style.display='block';
+});
+
+/* ---------------- Manuel analiz girişi ---------------- */
+let manualItems = [];
+const MAN_NUTRIENTS = [
+  {key:'hp',label:'Ham Protein',el:'manHp'},
+  {key:'hs',label:'Ham Selüloz',el:'manHs'},
+  {key:'hy',label:'Ham Yağ',el:'manHy'},
+  {key:'hk',label:'Ham Kül',el:'manHk'},
+  {key:'nisasta',label:'Nişasta',el:'manNisasta'},
+  {key:'adf',label:'ADF',el:'manAdf'},
+  {key:'ndf',label:'NDF',el:'manNdf'}
+];
+const MAN_ALL_INPUT_IDS = ['manNem','manYasNem','manKuruNem','manHp','manHs','manHy','manHk','manNisasta','manAdf','manNdf'];
+
+function manMode(){ return document.querySelector('input[name=manMode]:checked').value; }
+
+function updateManModeUI(){
+  const iki = manMode()==='iki';
+  document.getElementById('manNemTekWrap').style.display = iki ? 'none' : 'flex';
+  document.getElementById('manYasNemWrap').style.display = iki ? 'flex' : 'none';
+  document.getElementById('manKuruNemWrap').style.display = iki ? 'flex' : 'none';
+  renderManPreview();
+}
+document.querySelectorAll('input[name=manMode]').forEach(r=> r.addEventListener('change', updateManModeUI));
+
+function calcManualEntry(){
+  const iki = manMode()==='iki';
+  const list = MAN_NUTRIENTS;
+  let dmPct=null, values={}, nutrients=[];
+  if(!iki){
+    const nem = num(document.getElementById('manNem').value);
+    if(nem!==null) dmPct = 100-nem;
+    list.forEach(n=>{
+      const measured = num(document.getElementById(n.el).value);
+      if(measured===null) return;
+      let dm=null;
+      if(nem!==null && nem<100) dm = measured*100/(100-nem);
+      values[n.key] = {asFed:measured, dm};
+      nutrients.push({key:n.key,label:n.label});
+    });
+  } else {
+    const yasNem = num(document.getElementById('manYasNem').value);
+    const kuruNem = num(document.getElementById('manKuruNem').value);
+    if(yasNem!==null) dmPct = 100-yasNem;
+    else if(kuruNem!==null) dmPct = 100-kuruNem;
+    list.forEach(n=>{
+      const measured = num(document.getElementById(n.el).value);
+      if(measured===null) return;
+      let dm=null;
+      if(kuruNem!==null && kuruNem<100) dm = measured*100/(100-kuruNem);
+      else if(yasNem!==null && yasNem<100) dm = measured*100/(100-yasNem);
+      values[n.key] = {asFed:measured, dm};
+      nutrients.push({key:n.key,label:n.label});
+    });
+  }
+  const urun = document.getElementById('manUrun').value.trim() || 'Manuel Numune';
+  const tarih = document.getElementById('manTarih').value.trim() || new Date().toLocaleDateString('tr-TR');
+  return {urun, tarih, dmPct, values, nutrients};
+}
+
+function renderManPreview(){
+  const entry = calcManualEntry();
+  const box = document.getElementById('manPreview');
+  if(entry.nutrients.length===0){ box.innerHTML=''; return; }
+  const rows = entry.nutrients.map(n=>{
+    const v = entry.values[n.key];
+    return `<div><span class="lbl">${n.label}</span><span>Kuru Madde: ${fmt(v.dm)}%</span></div>`;
+  }).join('');
+  box.innerHTML = `<div class="detailgrid" style="margin-top:10px;">${rows}</div>
+    <div style="font-size:.75rem;color:var(--muted);margin-top:6px;">Ürün KM%: ${fmt(entry.dmPct)}%</div>`;
+}
+MAN_ALL_INPUT_IDS.forEach(id=>{
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('input', renderManPreview);
+});
+
+function renderManList(){
+  const el = document.getElementById('manList');
+  if(manualItems.length===0){ el.innerHTML=''; return; }
+  el.innerHTML = '<div style="font-size:.8rem;font-weight:700;color:var(--navy);margin-bottom:6px;">Eklenen Manuel Analizler</div>' +
+    manualItems.map((it,idx)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #eef1f4;font-size:.82rem;">
+      <span>${esc(it.urun)} <span style="color:var(--muted);">(${esc(it.tarih)})</span></span>
+      <button class="detailbtn manRemoveBtn" data-idx="${idx}" style="color:#c0392b;">Kaldır</button>
+    </div>`).join('');
+  el.querySelectorAll('.manRemoveBtn').forEach(b=>{
+    b.onclick = ()=>{ manualItems.splice(parseInt(b.dataset.idx,10),1); renderManList(); updateBasket(); };
+  });
+}
+
+document.getElementById('manAddBtn').addEventListener('click', ()=>{
+  const entry = calcManualEntry();
+  if(entry.nutrients.length===0){ alert('En az bir bileşen değeri gir.'); return; }
+  manualItems.push(entry);
+  renderManList();
+  updateBasket();
+  document.getElementById('reportCfgCard').style.display='block';
+  document.getElementById('manUrun').value='';
+  MAN_ALL_INPUT_IDS.forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  renderManPreview();
+});
+
+updateManModeUI();
 
 /* ---------------- UI: file load ---------------- */
 const dropzone = document.getElementById('dropzone');
@@ -538,7 +726,7 @@ document.getElementById('clearAllBtn').addEventListener('click', ()=>{
 
 /* ---------------- Basket ---------------- */
 function totalSelected(){
-  return Object.values(selected).reduce((a,s)=>a+s.size,0);
+  return Object.values(selected).reduce((a,s)=>a+s.size,0) + manualItems.length;
 }
 function updateBasket(){
   const t = totalSelected();
@@ -563,7 +751,19 @@ function buildReport(){
 
   let items = [];
   Object.keys(sheetsData).forEach(type=>{
-    selectedRowsForType(type).forEach(row=> items.push({type,row}));
+    selectedRowsForType(type).forEach(row=>{
+      const cols = type==='RAKIP'?RAKIP_COLS:YETIS_COLS;
+      items.push({
+        urun: row[cols.urun] || '-',
+        tarih: row[cols.tarih] || '-',
+        dmPct: productDM(type,row),
+        values: calcRow(type,row).values,
+        nutrients: nutrientsFor(type)
+      });
+    });
+  });
+  manualItems.forEach(it=>{
+    items.push({urun:it.urun, tarih:it.tarih, dmPct:it.dmPct, values:it.values, nutrients:it.nutrients});
   });
 
   if(items.length===0){
@@ -572,21 +772,15 @@ function buildReport(){
     const amac = esc(document.getElementById('fldAmac').value || 'Ürün Değerleri');
     const gonderen = esc(document.getElementById('fldGonderen').value || '-');
     const musteri = esc(document.getElementById('fldMusteri').value || '-');
-    const tarihler = [...new Set(items.map(it=>{
-      const c = it.type==='RAKIP'?RAKIP_COLS:YETIS_COLS;
-      return it.row[c.tarih] || '-';
-    }))];
+    const tarihler = [...new Set(items.map(it=>it.tarih || '-'))];
     const numuneT = esc(tarihler.join(', '));
 
-    const urunAdlari = esc([...new Set(items.map(it=>{
-      const cols = it.type==='RAKIP'?RAKIP_COLS:YETIS_COLS;
-      return it.row[cols.urun] || '-';
-    }))].join(', '));
+    const urunAdlari = esc([...new Set(items.map(it=>it.urun || '-'))].join(', '));
 
     let nutSet = [];
     const seenKey = new Set();
     items.forEach(it=>{
-      nutrientsFor(it.type).forEach(n=>{
+      it.nutrients.forEach(n=>{
         if(!seenKey.has(n.key)){ seenKey.add(n.key); nutSet.push(n); }
       });
     });
@@ -597,15 +791,12 @@ function buildReport(){
 
     let bodyRows = '';
     items.forEach(it=>{
-      const {type,row} = it;
-      const cols = type==='RAKIP'?RAKIP_COLS:YETIS_COLS;
-      const calc = calcRow(type,row);
-      const urun = esc(row[cols.urun] || '-');
-      const dmPct = productDM(type,row);
+      const urun = esc(it.urun || '-');
+      const dmPct = it.dmPct;
       if(basis==='both'){
         let afCells='', kmCells='';
         nutSet.forEach(n=>{
-          const v = calc.values[n.key];
+          const v = it.values[n.key];
           afCells += `<td>${v?fmt(v.asFed):'-'}%</td>`;
           kmCells += `<td>${v?fmt(v.dm):'-'}%</td>`;
         });
@@ -620,7 +811,7 @@ function buildReport(){
       } else {
         let cells = '';
         nutSet.forEach(n=>{
-          const v = calc.values[n.key];
+          const v = it.values[n.key];
           const val = v ? (basis==='asfed'?v.asFed:v.dm) : null;
           cells += `<td>${fmt(val)}%</td>`;
         });
