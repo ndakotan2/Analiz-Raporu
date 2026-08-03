@@ -132,6 +132,65 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
   .basisrow input{margin:0;}
   #reportSection{display:none;}
+  .fieldgrid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px;}
+  .fieldgrid label{font-size:.75rem;color:var(--muted);font-weight:600;display:flex;flex-direction:column;gap:4px;}
+  .fieldgrid input[type=text]{
+    padding:9px 10px;border:1px solid var(--border);border-radius:8px;font-size:.88rem;color:var(--text);
+    font-weight:500;
+  }
+  @media (min-width:560px){ .fieldgrid{grid-template-columns:1fr 1fr;} }
+
+  /* ---- Resmi rapor / letterhead ---- */
+  .official-report{
+    background:#fff;border-radius:14px;overflow:hidden;border:1px solid #e3e0d5;
+  }
+  .rep-header{
+    background:linear-gradient(120deg,#1e4d3a 0%,#2e6b4f 55%,#4c8f5c 100%);
+    color:#fff;padding:22px 20px 20px;position:relative;
+  }
+  .rep-brand{display:flex;align-items:center;gap:12px;}
+  .rep-logo{
+    width:46px;height:46px;flex:0 0 46px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%,#e8c25a,#c99a2e);
+    display:flex;align-items:center;justify-content:center;font-size:1.4rem;
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+  }
+  .rep-brandtext h1{margin:0;font-size:1.15rem;font-weight:800;letter-spacing:.02em;}
+  .rep-brandtext p{margin:2px 0 0;font-size:.72rem;opacity:.88;}
+  .rep-badge{
+    position:absolute;top:20px;right:18px;background:rgba(255,255,255,.16);
+    border:1px solid rgba(255,255,255,.4);padding:5px 12px;border-radius:20px;
+    font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  }
+  .rep-title{margin:16px 0 0;font-size:1rem;font-weight:700;letter-spacing:.03em;text-align:center;}
+  .rep-meta{
+    padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;
+    border-bottom:2px solid #eef1ec;
+  }
+  .rep-meta .full{grid-column:1/-1;}
+  .rep-meta div span{display:block;font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px;}
+  .rep-meta div b{font-size:.86rem;color:var(--text);}
+  .rep-table-wrap{padding:14px 20px 8px;overflow-x:auto;}
+  table.rep-table{width:100%;border-collapse:collapse;font-size:.76rem;min-width:520px;}
+  table.rep-table thead th{
+    background:#eef4ee;color:#1e4d3a;padding:8px 6px;text-align:left;font-size:.66rem;
+    text-transform:uppercase;letter-spacing:.03em;border-bottom:2px solid #cfe0d1;
+  }
+  table.rep-table td{padding:7px 6px;border-bottom:1px solid #eef1ec;}
+  table.rep-table tr.rep-basis-af td{background:#f6faf5;}
+  table.rep-table tr.rep-basis-km td{background:#fff9ec;font-weight:600;}
+  table.rep-table td.rep-basislabel{font-weight:700;font-size:.68rem;white-space:nowrap;}
+  table.rep-table tr.rep-basis-af td{border-bottom:none;}
+  .rep-footer{
+    display:flex;justify-content:space-between;gap:16px;padding:22px 20px 26px;flex-wrap:wrap;
+  }
+  .rep-sign{font-size:.78rem;color:var(--muted);min-width:150px;}
+  .rep-sign b{display:block;margin-top:22px;font-size:.85rem;color:var(--text);border-top:1px solid #d8dde3;padding-top:6px;}
+  .rep-strip{height:6px;background:linear-gradient(90deg,#e8c25a,#2e6b4f);}
+  .rep-empty{padding:30px;text-align:center;color:var(--muted);font-size:.85rem;}
+  @media print{
+    .official-report{border:none;border-radius:0;}
+  }
   .report-table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:6px;}
   .report-table th{background:var(--navy);color:#fff;padding:7px 6px;text-align:left;font-size:.7rem;}
   .report-table td{padding:6px;border-bottom:1px solid #eef1f4;}
@@ -186,19 +245,19 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <label><input type="radio" name="basis" value="asfed"> Sadece Asfeed</label>
       <label><input type="radio" name="basis" value="dm"> Sadece Kuru Madde</label>
     </div>
+    <div class="fieldgrid">
+      <label>Analizin Amacı<input type="text" id="fldAmac" value="Ürün Değerleri"></label>
+      <label>Numuneyi Gönderen<input type="text" id="fldGonderen" placeholder="Ad Soyad"></label>
+      <label>Müşteri / Firma<input type="text" id="fldMusteri" placeholder="Müşteri adı"></label>
+    </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
       <button class="btn btn-primary" id="buildReportBtn">Rapor Oluştur</button>
     </div>
   </div>
 
   <div class="card" id="reportSection">
-    <div id="reportCard">
-      <h2 style="margin-bottom:2px;">Rapor Önizleme</h2>
-      <div class="report-meta" id="reportMeta"></div>
-      <div id="reportTables"></div>
-    </div>
+    <div id="officialReport"></div>
     <div class="no-print" style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
-      <button class="btn btn-green" id="downloadXlsxBtn">⬇️ Excel indir</button>
       <button class="btn btn-outline" id="printBtn">🖨️ Yazdır / PDF olarak kaydet</button>
     </div>
   </div>
@@ -496,72 +555,106 @@ function selectedRowsForType(type){
   return [...selected[type]].sort((a,b)=>a-b).map(idx=>sheetsData[type].rows[idx]);
 }
 
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
 function buildReport(){
   const basis = document.querySelector('input[name=basis]:checked').value;
-  const tablesEl = document.getElementById('reportTables');
-  tablesEl.innerHTML='';
-  let any=false;
+  const container = document.getElementById('officialReport');
 
+  let items = [];
   Object.keys(sheetsData).forEach(type=>{
-    const rows = selectedRowsForType(type);
-    if(rows.length===0) return;
-    any = true;
-    const cols = type==='RAKIP'?RAKIP_COLS:YETIS_COLS;
-    const nuts = nutrientsFor(type);
+    selectedRowsForType(type).forEach(row=> items.push({type,row}));
+  });
 
-    let headCells = `<th>Tarih</th><th>${type==='RAKIP'?'Yem Adı':'Numune'}</th><th>${type==='RAKIP'?'Firma':'İşletme'}</th><th>Ürün KM%</th>`;
-    if(basis==='both') headCells += `<th>Baz</th>`;
-    nuts.forEach(n=>{
-      headCells += basis==='both' ? `<th>${n.label}</th>` : `<th>${n.label} (${basis==='asfed'?'Asfeed':'KM'})</th>`;
+  if(items.length===0){
+    container.innerHTML = '<div class="official-report"><div class="rep-empty">Henüz analiz seçilmedi.</div></div>';
+  } else {
+    const amac = esc(document.getElementById('fldAmac').value || 'Ürün Değerleri');
+    const gonderen = esc(document.getElementById('fldGonderen').value || '-');
+    const musteri = esc(document.getElementById('fldMusteri').value || '-');
+    const tarihler = [...new Set(items.map(it=>{
+      const c = it.type==='RAKIP'?RAKIP_COLS:YETIS_COLS;
+      return it.row[c.tarih] || '-';
+    }))];
+    const numuneT = esc(tarihler.join(', '));
+
+    const urunAdlari = esc([...new Set(items.map(it=>{
+      const cols = it.type==='RAKIP'?RAKIP_COLS:YETIS_COLS;
+      return it.row[cols.urun] || '-';
+    }))].join(', '));
+
+    let nutSet = [];
+    const seenKey = new Set();
+    items.forEach(it=>{
+      nutrientsFor(it.type).forEach(n=>{
+        if(!seenKey.has(n.key)){ seenKey.add(n.key); nutSet.push(n); }
+      });
     });
 
+    let headCells = `<th>Ürün</th><th>KM%</th>`;
+    if(basis==='both') headCells += `<th>Baz</th>`;
+    nutSet.forEach(n=> headCells += `<th>${n.label}</th>`);
+
     let bodyRows = '';
-    rows.forEach(row=>{
+    items.forEach(it=>{
+      const {type,row} = it;
+      const cols = type==='RAKIP'?RAKIP_COLS:YETIS_COLS;
       const calc = calcRow(type,row);
-      const urun = row[cols.urun]||'-';
-      const firma = type==='RAKIP'?(row[cols.firma]||'-'):(row[cols.isletme]||'-');
+      const urun = esc(row[cols.urun] || '-');
       const dmPct = productDM(type,row);
       if(basis==='both'){
-        let asfedVals = '', dmVals = '';
-        nuts.forEach(n=>{
+        let afCells='', kmCells='';
+        nutSet.forEach(n=>{
           const v = calc.values[n.key];
-          asfedVals += `<td class="asfed">${fmt(v.asFed)}%</td>`;
-          dmVals += `<td class="dm">${fmt(v.dm)}%</td>`;
+          afCells += `<td>${v?fmt(v.asFed):'-'}%</td>`;
+          kmCells += `<td>${v?fmt(v.dm):'-'}%</td>`;
         });
-        bodyRows += `<tr class="pairtop">
-            <td rowspan="2">${row[cols.tarih]||'-'}</td>
+        bodyRows += `<tr class="rep-basis-af">
             <td rowspan="2">${urun}</td>
-            <td rowspan="2">${firma}</td>
             <td rowspan="2" style="font-weight:700;">${fmt(dmPct)}%</td>
-            <td class="asfed baselabel">Asfeed</td>${asfedVals}
+            <td class="rep-basislabel">Asfeed</td>${afCells}
           </tr>
-          <tr class="pairbottom">
-            <td class="dm baselabel">Kuru Madde</td>${dmVals}
+          <tr class="rep-basis-km">
+            <td class="rep-basislabel">Kuru Madde</td>${kmCells}
           </tr>`;
       } else {
-        let cells = `<td>${row[cols.tarih]||'-'}</td><td>${urun}</td><td>${firma}</td><td style="font-weight:700;">${fmt(dmPct)}%</td>`;
-        nuts.forEach(n=>{
+        let cells = '';
+        nutSet.forEach(n=>{
           const v = calc.values[n.key];
-          cells += basis==='asfed' ? `<td class="asfed">${fmt(v.asFed)}%</td>` : `<td class="dm">${fmt(v.dm)}%</td>`;
+          const val = v ? (basis==='asfed'?v.asFed:v.dm) : null;
+          cells += `<td>${fmt(val)}%</td>`;
         });
-        bodyRows += `<tr>${cells}</tr>`;
+        bodyRows += `<tr><td>${urun}</td><td style="font-weight:700;">${fmt(dmPct)}%</td>${cells}</tr>`;
       }
     });
 
-    tablesEl.innerHTML += `
-      <table class="report-table">
-        <tr class="sectionhead"><td colspan="${4+(basis==='both'?1:0)+nuts.length}">${sheetsData[type].sheetName} (${rows.length} analiz)</td></tr>
-        <tr>${headCells}</tr>
-        ${bodyRows}
-      </table>`;
-  });
-
-  if(!any){
-    tablesEl.innerHTML = '<div class="empty">Henüz analiz seçilmedi.</div>';
+    container.innerHTML = `
+      <div class="official-report">
+        <div class="rep-strip"></div>
+        <div class="rep-header">
+          <div class="rep-badge">ANALİZ RAPORU</div>
+          <div class="rep-brand">
+            <div class="rep-logo">🌾</div>
+            <div class="rep-brandtext">
+              <h1>HAMMADDE ANALİZ</h1>
+            </div>
+          </div>
+        </div>
+        <div class="rep-meta">
+          <div><span>Analizin Amacı</span><b>${amac}</b></div>
+          <div><span>Numunenin Cinsi</span><b>${urunAdlari}</b></div>
+          <div><span>Numuneyi Gönderen</span><b>${gonderen}</b></div>
+          <div><span>Müşteri</span><b>${musteri}</b></div>
+          <div class="full"><span>Numune Tarihi</span><b>${numuneT}</b></div>
+        </div>
+        <div class="rep-table-wrap">
+          <table class="rep-table">
+            <thead><tr>${headCells}</tr></thead>
+            <tbody>${bodyRows}</tbody>
+          </table>
+        </div>
+      </div>`;
   }
-
-  document.getElementById('reportMeta').textContent =
-    `Oluşturulma: ${new Date().toLocaleDateString('tr-TR')} — Toplam ${totalSelected()} analiz — Baz: ${basis==='both'?'Asfeed + Kuru Madde':(basis==='asfed'?'Asfeed':'Kuru Madde')}`;
 
   document.getElementById('reportSection').style.display='block';
   const rs = document.getElementById('reportSection');
@@ -569,68 +662,6 @@ function buildReport(){
 }
 
 document.getElementById('buildReportBtn').addEventListener('click', buildReport);
-
-/* ---------------- Export to Excel ---------------- */
-document.getElementById('downloadXlsxBtn').addEventListener('click', ()=>{
-  const basis = document.querySelector('input[name=basis]:checked').value;
-  const wb = XLSX.utils.book_new();
-
-  Object.keys(sheetsData).forEach(type=>{
-    const rows = selectedRowsForType(type);
-    if(rows.length===0) return;
-    const cols = type==='RAKIP'?RAKIP_COLS:YETIS_COLS;
-    const nuts = nutrientsFor(type);
-
-    const header = ['Tarih', type==='RAKIP'?'Yem Adı':'Numune', type==='RAKIP'?'Firma':'İşletme', 'Ürün KM%'];
-    if(basis==='both') header.push('Baz');
-    nuts.forEach(n=>{
-      header.push(basis==='both' ? n.label+' %' : n.label+' ('+(basis==='asfed'?'Asfeed':'KM')+') %');
-    });
-
-    const aoa = [header];
-    const merges = [];
-    rows.forEach(row=>{
-      const calc = calcRow(type,row);
-      const urun = row[cols.urun]||'';
-      const firma = type==='RAKIP'?(row[cols.firma]||''):(row[cols.isletme]||'');
-      const dmPct = fmt(productDM(type,row));
-      if(basis==='both'){
-        const topRowIdx = aoa.length;   // 0-indexed row in aoa (row0 = header)
-        const asfedLine = [row[cols.tarih]||'', urun, firma, dmPct, 'Asfeed'];
-        const dmLine = ['', '', '', '', 'Kuru Madde'];
-        nuts.forEach(n=>{
-          const v = calc.values[n.key];
-          asfedLine.push(fmt(v.asFed));
-          dmLine.push(fmt(v.dm));
-        });
-        aoa.push(asfedLine);
-        aoa.push(dmLine);
-        // Tarih/Ürün/Firma/KM% hücrelerini iki satır için birleştir
-        [0,1,2,3].forEach(c=>{
-          merges.push({s:{r:topRowIdx,c}, e:{r:topRowIdx+1,c}});
-        });
-      } else {
-        const line = [row[cols.tarih]||'', urun, firma, dmPct];
-        nuts.forEach(n=>{
-          const v = calc.values[n.key];
-          line.push(basis==='asfed' ? fmt(v.asFed) : fmt(v.dm));
-        });
-        aoa.push(line);
-      }
-    });
-
-    const ws = XLSX.utils.aoa_to_sheet(aoa);
-    if(merges.length) ws['!merges'] = merges;
-    ws['!cols'] = header.map((h,i)=> i<3 ? {wch:18} : {wch:14});
-    const sheetName = (type==='RAKIP'?'Rakip Yem':'Yetistirici').substring(0,31);
-    XLSX.utils.book_append_sheet(wb, ws, sheetName);
-  });
-
-  if(wb.SheetNames.length===0){ alert('Önce analiz seçip rapor oluşturun.'); return; }
-
-  const stamp = new Date().toISOString().slice(0,10);
-  XLSX.writeFile(wb, `Analiz_Raporu_${stamp}.xlsx`);
-});
 
 document.getElementById('printBtn').addEventListener('click', ()=>window.print());
 
