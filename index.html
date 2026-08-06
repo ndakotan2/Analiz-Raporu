@@ -217,9 +217,9 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .report-table tr.sectionhead td{background:var(--navy-d);color:#fff;font-weight:700;font-size:.82rem;}
   .report-meta{font-size:.75rem;color:var(--muted);margin:4px 0 12px;}
   @media print{
-    header,.card:not(#reportCard),.basket,.no-print{display:none !important;}
+    header,.card:not(#reportSection),.basket,.no-print{display:none !important;}
     body{background:#fff;padding:0;}
-    #reportCard{border:none;box-shadow:none;padding:0;}
+    #reportSection{border:none;box-shadow:none;padding:0;}
   }
 </style>
 </head>
@@ -229,7 +229,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   <h1>📊 Analiz Rapor Aracı</h1>
   <p>Rakip Yem / Yetiştirici raporundan seçili analizleri Asfeed + Kuru Madde raporuna dönüştür</p>
   <div style="margin-top:8px;">
-    <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fndakotan2.github.io%2FAnaliz-Raporu%2F&count_bg=%2312938C&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=Ziyaret&edge_flat=false" alt="ziyaret sayacı">
+    <img src="https://hits.sh/ndakotan2.github.io/Analiz-Raporu.svg?label=Ziyaret&color=12938c&labelColor=555555" alt="ziyaret sayacı">
   </div>
 </header>
 
@@ -323,7 +323,11 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   <div class="card" id="reportSection">
     <div id="officialReport"></div>
     <div class="no-print" style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
-      <button class="btn btn-outline" id="printBtn">🖨️ Yazdır / PDF olarak kaydet</button>
+      <button class="btn btn-outline" id="printBtn">🖨️ Yazdır</button>
+      <button class="btn btn-green" id="pdfBtn">📄 PDF Olarak Kaydet</button>
+    </div>
+    <div class="no-print" style="font-size:.72rem;color:var(--muted);margin-top:8px;">
+      Açılan ekranda "Hedef / Yazıcı" olarak "PDF olarak kaydet"i seç. iPhone'da: önizleme küçük resmine iki parmakla yakınlaş, sonra sağ üstteki paylaş simgesinden "Dosyalara Kaydet"i seç.
     </div>
   </div>
 
@@ -857,6 +861,7 @@ function buildReport(){
 document.getElementById('buildReportBtn').addEventListener('click', buildReport);
 
 document.getElementById('printBtn').addEventListener('click', ()=>window.print());
+document.getElementById('pdfBtn').addEventListener('click', ()=>window.print());
 
 </script>
 </body>
